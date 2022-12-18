@@ -12,8 +12,9 @@ if [[ -f $zet_folder/$temp_file ]]; then
   title=$(head -n 1 $zet_folder/$temp_file | awk '{ print substr ($0, 3 ) }')
   mkdir $zet_folder/cards/$folder_name
   mv $zet_folder/$temp_file $zet_folder/cards/$folder_name 
-  now=$(date)
-  echo "${now} [${title}](./cards/${folder_name})\n" >> $zet_folder/README.md
+  now=$(date --rfc-email)
+  line="**${now} | [${title}](./cards/${folder_name})**<br>"
+  echo $line | cat - $zet_folder/README.md > ztmp && mv ztmp $zet_folder/README.md
   git -C $zet_folder add .
   git -C $zet_folder commit -m $title
   git -C $zet_folder push
