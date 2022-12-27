@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+selected=`pscale database ls -f csv | cut -d ',' -f1 | tail -n +2 | head -n 1 | fzf`
+
+if [[ -z $selected ]]; then
+    exit 1
+fi
+
+tmux_running=$(pgrep tmux)
+
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+    tmux new-session -s $selected pscale connect $selected main  
+    exit 0
+fi
+
+if ! tmux has-session -t=$selected 2> /dev/null; then
+    tmux new-session -ds $selected pscale connect $selected main
+fi
+
+tmux switch-client -t $selected
