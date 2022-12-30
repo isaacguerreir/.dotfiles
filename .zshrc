@@ -91,6 +91,7 @@ source $ZSH/oh-my-zsh.sh
 bindkey -s ^f "tmux-sessionizer\n"
 bindkey -s ^z "zet\n"
 bindkey -s ^u "cht\n"
+bindkey -s ^d "dbconn\n"
 
 
 # Compilation flags
