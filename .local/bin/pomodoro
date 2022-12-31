@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+temp_file=~/.local/state/tmux/pomodoro 
+pomo_status=$(pomo show)
+
+if [[ -n $pomo_status ]]; then
+  pomo stop
+else
+  pomo start
+fi
