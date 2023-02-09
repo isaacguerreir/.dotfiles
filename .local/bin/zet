@@ -1,24 +1,48 @@
 #!/usr/bin/zsh
 
 zet_folder=/home/$USER/personal/zet
-temp_file='temp/README.md'
+zet_actions='Create new zet
+Update existing zet'
 
-mkdir $zet_folder/temp
-chmod +w $zet_folder/temp
-nvim $zet_folder/$temp_file
+selected_action=$(echo $zet_actions | fzf -d, --tac)
 
-if [[ -f $zet_folder/$temp_file ]]; then
-  folder_name=$(uuidgen)
-  title=$(head -n 1 $zet_folder/$temp_file | awk '{ print substr ($0, 3 ) }')
-  mkdir $zet_folder/cards/$folder_name
-  mv $zet_folder/$temp_file $zet_folder/cards/$folder_name 
-  now=$(date --rfc-email)
-  line="**${now} | [${title}](./cards/${folder_name})**<br>"
-  echo $line | cat - $zet_folder/README.md > ztmp && mv ztmp $zet_folder/README.md
-  git -C $zet_folder add .
-  git -C $zet_folder commit -m $title
-  git -C $zet_folder push
-  echo 'Zettelkasten card successfully created.'
+if [[ -z $selected_action ]]; then
+    exit 0
 fi
 
-rm -rf $zet_folder/temp
+if [[ "$selected_action" == "Create new zet" ]]; then
+  temp_file='temp/README.md'
+
+  mkdir $zet_folder/temp
+  chmod +w $zet_folder/temp
+  nvim $zet_folder/$temp_file
+
+  if [[ -f $zet_folder/$temp_file ]]; then
+    folder_name=$(uuidgen)
+    title=$(head -n 1 $zet_folder/$temp_file | awk '{ print substr ($0, 3 ) }')
+    mkdir $zet_folder/cards/$folder_name
+    mv $zet_folder/$temp_file $zet_folder/cards/$folder_name 
+    now=$(date)
+    echo "${now} [${title}](./cards/${folder_name})\n" >> $zet_folder/README.md
+    git -C $zet_folder add .
+    git -C $zet_folder commit -m $title
+    git -C $zet_folder push
+    echo 'Zettelkasten card successfully created.'
+  fi
+
+  rm -rf $zet_folder/temp
+else
+  paths=$(cat $zet_folder/README.md | awk -F'(' '{print $2}' | awk -F')' '{print $1}' | cut -f2 -d.)
+  names=$(cat $zet_folder/README.md | awk -F'[][]'  '{print $2}')
+
+  selected=$(echo "$names" | fzf)
+  number=$(echo $names | grep -n $selected | cut -f1 -d: | head)
+  selected_path=$(echo $paths | head -${number} | tail -1)
+
+  nvim $zet_folder/$selected_path/README.md
+  now=$(date)
+  git -C $zet_folder add .
+  git -C $zet_folder commit -m "Zet card titled ${selected} updated at ${now}"
+  git -C $zet_folder push
+  echo 'Zettelkasten card successfully updated.'
+fi
