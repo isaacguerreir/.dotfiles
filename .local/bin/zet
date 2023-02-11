@@ -2,7 +2,9 @@
 
 zet_folder=/home/$USER/personal/zet
 zet_actions='Create new zet
+Sync zet
 Read zet
+Delete zet
 Update existing zet'
 
 selected_action=$(echo $zet_actions | fzf -d, --tac)
@@ -23,8 +25,10 @@ if [[ "$selected_action" == "Create new zet" ]]; then
     title=$(head -n 1 $zet_folder/$temp_file | awk '{ print substr ($0, 3 ) }')
     mkdir $zet_folder/cards/$folder_name
     mv $zet_folder/$temp_file $zet_folder/cards/$folder_name 
-    now=$(date)
-    echo "${now} [${title}](./cards/${folder_name})\n" >> $zet_folder/README.md
+    now=$(date --rfc-email)
+    line="**${now} | [${title}](./cards/${folder_name})**<br>"
+    echo $line | cat - $zet_folder/README.md > ztmp && mv ztmp $zet_folder/README.md
+
     git -C $zet_folder add .
     git -C $zet_folder commit -m $title
     git -C $zet_folder push
@@ -33,6 +37,9 @@ if [[ "$selected_action" == "Create new zet" ]]; then
 
   rm -rf $zet_folder/temp
 
+elif [[ "$selected_action" == "Sync zet" ]]; then
+  git -C $zet_folder pull
+  
 elif [[ "$selected_action" == "Read zet" ]]; then
   paths=$(cat $zet_folder/README.md | awk -F'(' '{print $2}' | awk -F')' '{print $1}' | cut -f2 -d.)
   names=$(cat $zet_folder/README.md | awk -F'[][]'  '{print $2}')
@@ -42,6 +49,24 @@ elif [[ "$selected_action" == "Read zet" ]]; then
   selected_path=$(echo $paths | head -${number} | tail -1)
 
   nvim -M $zet_folder/$selected_path/README.md
+
+elif [[ "$selected_action" == "Delete zet" ]]; then
+  paths=$(cat $zet_folder/README.md | awk -F'(' '{print $2}' | awk -F')' '{print $1}' | cut -f2 -d.)
+  names=$(cat $zet_folder/README.md | awk -F'[][]'  '{print $2}')
+
+  selected=$(echo "$names" | fzf)
+  number=$(echo $names | grep -n $selected | cut -f1 -d: | head)
+  selected_path=$(echo $paths | head -${number} | tail -1)
+
+  rm -rf $zet_folder/$selected_path
+
+  sed -i "${number}d" $zet_folder/README.md 
+
+  now=$(date)
+  git -C $zet_folder add .
+  git -C $zet_folder commit -m "Zet card titled ${selected} deleted at ${now}"
+  git -C $zet_folder push
+  echo 'Zettelkasten card successfully deleted.'
 
 else
   paths=$(cat $zet_folder/README.md | awk -F'(' '{print $2}' | awk -F')' '{print $1}' | cut -f2 -d.)
