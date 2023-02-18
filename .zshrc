@@ -87,13 +87,6 @@ source $ZSH/oh-my-zsh.sh
 # else
 #   export EDITOR='mvim'
 # fi
-#
-bindkey -s ^f "tmux-sessionizer\n"
-bindkey -s ^z "zet\n"
-bindkey -s ^u "cht\n"
-bindkey -s ^d "dbconn\n"
-bindkey -s ^p "pomodoro\n"
-
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -103,14 +96,6 @@ bindkey -s ^p "pomodoro\n"
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 #
+# Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="$HOME/.local/share/neovim/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
